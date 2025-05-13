@@ -1,0 +1,167 @@
+{
+    "info": {
+        "name": "ABot API Test Pipeline",
+        "description": "This collection demonstrates the ABot API Test Pipeline using GitHub Actions integration.",
+        "_postman_id": "b6f6b1e3-c7e7-4bb1-b2ff-95f0db0c204d",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Authenticate with ABot",
+            "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"username\": \"{{ABOT_USERNAME}}\", \"password\": \"{{ABOT_PASSWORD}}\"}"
+                },
+                "url": {
+                    "raw": "{{ABOT_BASE_URL}}/api/auth/token",
+                    "protocol": "https",
+                    "host": [
+                        "{{ABOT_BASE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "auth",
+                        "token"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Get Available Feature Tags",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{auth_token}}",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "{{ABOT_BASE_URL}}/api/features/tags",
+                    "protocol": "https",
+                    "host": [
+                        "{{ABOT_BASE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "features",
+                        "tags"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Start Test Execution",
+            "request": {
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{auth_token}}",
+                        "type": "text"
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": "{\"feature_tag\": \"{{FEATURE_TAG}}\"}"
+                },
+                "url": {
+                    "raw": "{{ABOT_BASE_URL}}/api/execute",
+                    "protocol": "https",
+                    "host": [
+                        "{{ABOT_BASE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "execute"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Monitor Test Progress",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{auth_token}}",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "{{ABOT_BASE_URL}}/api/status/{{execution_id}}",
+                    "protocol": "https",
+                    "host": [
+                        "{{ABOT_BASE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "status",
+                        "{{execution_id}}"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Fetch Test Results",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{auth_token}}",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "{{ABOT_BASE_URL}}/api/results/{{execution_id}}",
+                    "protocol": "https",
+                    "host": [
+                        "{{ABOT_BASE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "results",
+                        "{{execution_id}}"
+                    ]
+                }
+            },
+            "response": []
+        },
+        {
+            "name": "Download Logs",
+            "request": {
+                "method": "GET",
+                "header": [
+                    {
+                        "key": "Authorization",
+                        "value": "Bearer {{auth_token}}",
+                        "type": "text"
+                    }
+                ],
+                "url": {
+                    "raw": "{{ABOT_BASE_URL}}/api/logs/{{execution_id}}",
+                    "protocol": "https",
+                    "host": [
+                        "{{ABOT_BASE_URL}}"
+                    ],
+                    "path": [
+                        "api",
+                        "logs",
+                        "{{execution_id}}"
+                    ]
+                }
+            },
+            "response": []
+        }
+    ]
+}
