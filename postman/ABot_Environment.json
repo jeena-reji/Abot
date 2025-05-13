@@ -1,0 +1,21 @@
+{
+  "id": "1",
+  "name": "ABot Environment",
+  "values": [
+    {
+      "key": "ABOT_BASE_URL",
+      "value": "https://abot.example.com",
+      "enabled": true
+    },
+    {
+      "key": "ABOT_USERNAME",
+      "value": "user123",
+      "enabled": true
+    },
+    {
+      "key": "ABOT_PASSWORD",
+      "value": "mypassword123",
+      "enabled": true
+    }
+  ]
+}
