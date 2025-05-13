@@ -32,7 +32,7 @@ jobs:
           
     # Optionally, you can save the test results to a file and upload them
     - name: Save and upload test results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v2
       with:
         name: postman-test-results
         path: postman/newman/reports
