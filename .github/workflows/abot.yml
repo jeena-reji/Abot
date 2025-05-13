@@ -1,0 +1,36 @@
+name: ABot Test Automation
+
+on:
+  workflow_dispatch: # Manually trigger the workflow
+
+jobs:
+  run-abot-tests:
+    name: Run ABot REST API Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      - name: Install Dependencies
+        run: |
+          pip install requests
+
+      - name: Run ABot Test Pipeline
+        env:
+          ABOT_USERNAME: ${{ secrets.ABOT_USERNAME }}
+          ABOT_PASSWORD: ${{ secrets.ABOT_PASSWORD }}
+        run: |
+          python abot_pipeline.py
+
+      - name: Upload ABot Logs
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: abot-logs
+          path: abot_logs/
