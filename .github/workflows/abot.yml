@@ -1,36 +1,54 @@
-name: ABot Test Automation
+name: ABot API Testing Pipeline
 
 on:
-  workflow_dispatch: # Manually trigger the workflow
+  workflow_dispatch:
 
 jobs:
-  run-abot-tests:
-    name: Run ABot REST API Tests
+  run_tests:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.10'
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
 
-      - name: Install Dependencies
-        run: |
-          pip install requests
+    - name: Install Newman and CSV converter
+      run: |
+        npm install -g newman
+        npm install -g newman-reporter-htmlextra
 
-      - name: Run ABot Test Pipeline
-        env:
-          ABOT_USERNAME: ${{ secrets.ABOT_USERNAME }}
-          ABOT_PASSWORD: ${{ secrets.ABOT_PASSWORD }}
-        run: |
-          python abot_pipeline.py
+    - name: Create reports directory
+      run: mkdir -p postman/newman/reports
 
-      - name: Upload ABot Logs
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: abot-logs
-          path: abot_logs/
+    - name: Run Postman Collection and export to JSON
+      run: |
+        newman run ./postman/ABot_Test_Collection.json \
+          --reporters cli,json \
+          --reporter-json-export postman/newman/reports/results.json
+
+    - name: Convert JSON to CSV
+      run: |
+        node -e "
+        const fs = require('fs');
+        const json = JSON.parse(fs.readFileSync('postman/newman/reports/results.json'));
+        const csv = ['iteration,item.name,response.code,response.status'];
+        json.run.executions.forEach(exec => {
+          csv.push([
+            exec.cursor?.iteration || 0,
+            exec.item.name,
+            exec.response.code,
+            exec.response.status
+          ].join(','));
+        });
+        fs.writeFileSync('postman/newman/reports/results.csv', csv.join('\n'));
+        "
+
+    - name: Upload test results (CSV)
+      uses: actions/upload-artifact@v4
+      with:
+        name: postman-test-results
+        path: postman/newman/reports/results.csv
