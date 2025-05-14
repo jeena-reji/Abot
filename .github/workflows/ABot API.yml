@@ -28,7 +28,9 @@ jobs:
           --environment ./postman/ABot_Environment.json \
           --global-var "ABOT_USERNAME=${{ secrets.ABOT_USERNAME }}" \
           --global-var "ABOT_PASSWORD=${{ secrets.ABOT_PASSWORD }}" \
-          --global-var "ABOT_BASE_URL=${{ secrets.ABOT_BASE_URL }}"
+          --global-var "ABOT_BASE_URL=${{ secrets.ABOT_BASE_URL }}" \
+          --reporters cli,junit \
+          --reporter-junit-export postman/newman/reports/results.xml
           
     # Optionally, you can save the test results to a file and upload them
     - name: Save and upload test results
