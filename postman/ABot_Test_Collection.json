@@ -7,6 +7,23 @@
   "item": [
     {
       "name": "1. User Token API (Login)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData && jsonData.token) {",
+              "    pm.environment.set('userToken', jsonData.token);",
+              "    console.log('Token saved to environment: ' + jsonData.token);",
+              "} else {",
+              "    console.log('No token found in response');",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -17,7 +34,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"email\": \"admin\",\n    \"password\": \"admin1234\",\n    \"expires\": false\n}"
+          "raw": "{\n    \"email\": \"user123\",\n    \"password\": \"mypassword123\",\n    \"expires\": false\n}"
         },
         "url": {
           "raw": "https://reqres.in/api/login",
@@ -35,10 +52,28 @@
     },
     {
       "name": "2. Feature File Tags API (List Features)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "console.log('Selected feature tags: ' + pm.environment.get('featureTags'));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
+          }
+        ],
         "url": {
-          "raw": "https://jsonplaceholder.typicode.com/posts",
+          "raw": "https://jsonplaceholder.typicode.com/posts?tags={{featureTags}}",
           "protocol": "https",
           "host": [
             "jsonplaceholder",
@@ -47,23 +82,50 @@
           ],
           "path": [
             "posts"
+          ],
+          "query": [
+            {
+              "key": "tags",
+              "value": "{{featureTags}}"
+            }
           ]
         }
       }
     },
     {
       "name": "3. Update Config API (Mock Config Save)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData && jsonData.id) {",
+              "    console.log('Config updated successfully with ID: ' + jsonData.id);",
+              "    console.log('Network type: ' + pm.environment.get('networkType'));",
+              "    console.log('Test type: ' + pm.environment.get('testType'));",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
           {
             "key": "Content-Type",
             "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
           }
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"network\": \"5G\",\n    \"type\": \"functional\"\n}"
+          "raw": "{\n    \"network\": \"{{networkType}}\",\n    \"type\": \"{{testType}}\"\n}"
         },
         "url": {
           "raw": "https://jsonplaceholder.typicode.com/posts",
@@ -81,17 +143,37 @@
     },
     {
       "name": "4. Execute Feature File Tag API (Trigger Test)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData && jsonData.id) {",
+              "    pm.environment.set('executionId', jsonData.id);",
+              "    console.log('Execution triggered with ID: ' + jsonData.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
           {
             "key": "Content-Type",
             "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
           }
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"test_id\": \"12345\"\n}"
+          "raw": "{\n    \"test_id\": \"12345\",\n    \"tags\": \"{{featureTags}}\"\n}"
         },
         "url": {
           "raw": "https://jsonplaceholder.typicode.com/posts",
@@ -111,8 +193,15 @@
       "name": "5. Execution Status API",
       "request": {
         "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
+          }
+        ],
         "url": {
-          "raw": "https://jsonplaceholder.typicode.com/posts/1",
+          "raw": "https://jsonplaceholder.typicode.com/posts/{{executionId}}",
           "protocol": "https",
           "host": [
             "jsonplaceholder",
@@ -121,7 +210,7 @@
           ],
           "path": [
             "posts",
-            "1"
+            "{{executionId}}"
           ]
         }
       }
@@ -130,8 +219,15 @@
       "name": "6. Latest Artifact Name API",
       "request": {
         "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
+          }
+        ],
         "url": {
-          "raw": "https://jsonplaceholder.typicode.com/comments",
+          "raw": "https://jsonplaceholder.typicode.com/comments?executionId={{executionId}}",
           "protocol": "https",
           "host": [
             "jsonplaceholder",
@@ -140,6 +236,12 @@
           ],
           "path": [
             "comments"
+          ],
+          "query": [
+            {
+              "key": "executionId",
+              "value": "{{executionId}}"
+            }
           ]
         }
       }
@@ -148,8 +250,15 @@
       "name": "7. Execution Summary API",
       "request": {
         "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
+          }
+        ],
         "url": {
-          "raw": "https://jsonplaceholder.typicode.com/comments/1",
+          "raw": "https://jsonplaceholder.typicode.com/comments/{{executionId}}",
           "protocol": "https",
           "host": [
             "jsonplaceholder",
@@ -158,15 +267,37 @@
           ],
           "path": [
             "comments",
-            "1"
+            "{{executionId}}"
           ]
         }
       }
     },
     {
       "name": "8. Vendor Key API",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "if (jsonData && jsonData.id) {",
+              "    pm.environment.set('vendorKey', jsonData.id);",
+              "    console.log('Vendor key retrieved: ' + jsonData.id);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
       "request": {
         "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
+          }
+        ],
         "url": {
           "raw": "https://jsonplaceholder.typicode.com/users/1",
           "protocol": "https",
@@ -186,8 +317,15 @@
       "name": "9. Execution Pass/Fail Result API",
       "request": {
         "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
+          }
+        ],
         "url": {
-          "raw": "https://jsonplaceholder.typicode.com/users",
+          "raw": "https://jsonplaceholder.typicode.com/users?executionId={{executionId}}&vendorKey={{vendorKey}}",
           "protocol": "https",
           "host": [
             "jsonplaceholder",
@@ -196,6 +334,16 @@
           ],
           "path": [
             "users"
+          ],
+          "query": [
+            {
+              "key": "executionId",
+              "value": "{{executionId}}"
+            },
+            {
+              "key": "vendorKey",
+              "value": "{{vendorKey}}"
+            }
           ]
         }
       }
@@ -204,8 +352,15 @@
       "name": "10. Failure Stats/Logs API",
       "request": {
         "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
+          }
+        ],
         "url": {
-          "raw": "https://jsonplaceholder.typicode.com/posts/2",
+          "raw": "https://jsonplaceholder.typicode.com/posts/{{executionId}}?details=failures",
           "protocol": "https",
           "host": [
             "jsonplaceholder",
@@ -214,7 +369,13 @@
           ],
           "path": [
             "posts",
-            "2"
+            "{{executionId}}"
+          ],
+          "query": [
+            {
+              "key": "details",
+              "value": "failures"
+            }
           ]
         }
       }
@@ -223,8 +384,15 @@
       "name": "11. Latest Executed FF List API",
       "request": {
         "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
+          }
+        ],
         "url": {
-          "raw": "https://jsonplaceholder.typicode.com/albums",
+          "raw": "https://jsonplaceholder.typicode.com/albums?executionId={{executionId}}",
           "protocol": "https",
           "host": [
             "jsonplaceholder",
@@ -233,6 +401,12 @@
           ],
           "path": [
             "albums"
+          ],
+          "query": [
+            {
+              "key": "executionId",
+              "value": "{{executionId}}"
+            }
           ]
         }
       }
@@ -241,8 +415,15 @@
       "name": "12. Download TestAutomation Log API",
       "request": {
         "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
+          }
+        ],
         "url": {
-          "raw": "https://jsonplaceholder.typicode.com/albums/1",
+          "raw": "https://jsonplaceholder.typicode.com/albums/{{executionId}}?log=true",
           "protocol": "https",
           "host": [
             "jsonplaceholder",
@@ -251,7 +432,13 @@
           ],
           "path": [
             "albums",
-            "1"
+            "{{executionId}}"
+          ],
+          "query": [
+            {
+              "key": "log",
+              "value": "true"
+            }
           ]
         }
       }
@@ -260,8 +447,15 @@
       "name": "13. Detail Execution Status API",
       "request": {
         "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{userToken}}",
+            "type": "text"
+          }
+        ],
         "url": {
-          "raw": "https://jsonplaceholder.typicode.com/posts/3",
+          "raw": "https://jsonplaceholder.typicode.com/posts/{{executionId}}?detailed=true",
           "protocol": "https",
           "host": [
             "jsonplaceholder",
@@ -270,7 +464,13 @@
           ],
           "path": [
             "posts",
-            "3"
+            "{{executionId}}"
+          ],
+          "query": [
+            {
+              "key": "detailed",
+              "value": "true"
+            }
           ]
         }
       }
