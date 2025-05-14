@@ -1,0 +1,196 @@
+name: ABot API Testing Pipeline
+on:
+  workflow_dispatch:
+    inputs:
+      featureTags:
+        description: 'Feature file tags to execute (comma separated)'
+        required: false
+        default: 'regression'
+        type: string
+      networkType:
+        description: 'Network type'
+        required: true
+        default: '5G'
+        type: choice
+        options:
+          - '4G'
+          - '5G'
+          - 'ORAN'
+      testType:
+        description: 'Test execution type'
+        required: true
+        default: 'functional'
+        type: choice
+        options:
+          - 'functional'
+          - 'load'
+          - 'performance'
+  push:
+    paths:
+      - 'postman/**'
+
+jobs:
+  run_abot_tests:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+        
+    - name: Install Newman and reporters
+      run: |
+        npm install -g newman
+        npm install -g newman-reporter-htmlextra
+        
+    - name: Create reports directory
+      run: mkdir -p postman/newman/reports
+      
+    - name: Setup environment variables from inputs
+      run: |
+        echo "FEATURE_TAGS=${{ github.event.inputs.featureTags || 'regression' }}" >> $GITHUB_ENV
+        echo "NETWORK_TYPE=${{ github.event.inputs.networkType || '5G' }}" >> $GITHUB_ENV
+        echo "TEST_TYPE=${{ github.event.inputs.testType || 'functional' }}" >> $GITHUB_ENV
+      
+    - name: Create environment file for Newman
+      run: |
+        cat > postman/environment.json << EOF
+        {
+          "id": "abot-env",
+          "name": "ABot Environment",
+          "values": [
+            {
+              "key": "featureTags",
+              "value": "${{ env.FEATURE_TAGS }}",
+              "enabled": true
+            },
+            {
+              "key": "networkType",
+              "value": "${{ env.NETWORK_TYPE }}",
+              "enabled": true
+            },
+            {
+              "key": "testType",
+              "value": "${{ env.TEST_TYPE }}",
+              "enabled": true
+            },
+            {
+              "key": "userToken",
+              "value": "",
+              "enabled": true
+            },
+            {
+              "key": "executionId",
+              "value": "",
+              "enabled": true
+            }
+          ]
+        }
+        EOF
+        
+    - name: Run Postman Collection with workflow inputs
+      run: |
+        newman run ./postman/ABot_Test_Collection.json \
+          --environment ./postman/environment.json \
+          --reporters cli,json,htmlextra \
+          --reporter-json-export postman/newman/reports/results.json \
+          --reporter-htmlextra-export postman/newman/reports/results.html
+          
+    - name: Convert JSON to CSV (with details)
+      run: |
+        node -e "
+        const fs = require('fs');
+        const json = JSON.parse(fs.readFileSync('postman/newman/reports/results.json'));
+        
+        // Status explanations
+        const statusExplain = {
+          200: 'OK - API executed successfully',
+          201: 'Created - Resource created successfully',
+          204: 'No Content - Request processed, no content returned',
+          400: 'Bad Request - Invalid parameters or request',
+          401: 'Unauthorized - Login failed or token missing',
+          403: 'Forbidden - Not authorized to access this resource',
+          404: 'Not Found - Resource not found',
+          409: 'Conflict - Resource conflict',
+          500: 'Server Error - Internal server error occurred'
+        };
+        
+        const csv = ['iteration,item_name,request_method,endpoint,response_code,status,time_ms,explanation'];
+        json.run.executions.forEach(exec => {
+          const code = exec.response?.code || '';
+          const status = exec.response?.status || '';
+          const time = exec.response?.responseTime || '';
+          const method = exec.request?.method || '';
+          const url = exec.request?.url?.path?.join('/') || '';
+          const explanation = statusExplain[code] || 'Unknown Status';
+          
+          // Clean item name for CSV (replace commas)
+          const itemName = (exec.item.name || '').replace(/,/g, ' ');
+          
+          csv.push([
+            exec.cursor?.iteration || 0,
+            itemName,
+            method,
+            url,
+            code,
+            status,
+            time,
+            explanation
+          ].join(','));
+        });
+        fs.writeFileSync('postman/newman/reports/results.csv', csv.join('\\n'));
+        "
+        
+    - name: Generate test execution summary
+      run: |
+        node -e "
+        const fs = require('fs');
+        const json = JSON.parse(fs.readFileSync('postman/newman/reports/results.json'));
+        
+        const summary = {
+          totalRequests: json.run.stats.requests.total,
+          failedRequests: json.run.stats.requests.failed,
+          successRate: ((json.run.stats.requests.total - json.run.stats.requests.failed) / json.run.stats.requests.total * 100).toFixed(2) + '%',
+          totalTime: json.run.timings.completed - json.run.timings.started + 'ms',
+          networkType: process.env.NETWORK_TYPE,
+          testType: process.env.TEST_TYPE,
+          featureTags: process.env.FEATURE_TAGS
+        };
+        
+        fs.writeFileSync('postman/newman/reports/summary.json', JSON.stringify(summary, null, 2));
+        console.log('Test Execution Summary:');
+        console.log('- Feature Tags: ' + process.env.FEATURE_TAGS);
+        console.log('- Network Type: ' + process.env.NETWORK_TYPE); 
+        console.log('- Test Type: ' + process.env.TEST_TYPE);
+        console.log('- Success Rate: ' + summary.successRate);
+        console.log('- Total Requests: ' + summary.totalRequests);
+        console.log('- Failed Requests: ' + summary.failedRequests);
+        console.log('- Total Time: ' + summary.totalTime);
+        "
+      
+    - name: Upload test results (JSON)
+      uses: actions/upload-artifact@v4
+      with:
+        name: postman-results-json
+        path: postman/newman/reports/results.json
+        
+    - name: Upload test results (CSV)
+      uses: actions/upload-artifact@v4
+      with:
+        name: postman-results-csv
+        path: postman/newman/reports/results.csv
+        
+    - name: Upload test results (HTML)
+      uses: actions/upload-artifact@v4
+      with:
+        name: postman-results-html
+        path: postman/newman/reports/results.html
+        
+    - name: Upload test summary
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-execution-summary
+        path: postman/newman/reports/summary.json
