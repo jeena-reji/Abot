@@ -1,0 +1,109 @@
+name: ABot API Testing Pipeline
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'postman/**'  # Also trigger when Postman files change
+
+jobs:
+  run_tests:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '16'
+        
+    - name: Install Newman and reporters
+      run: |
+        npm install -g newman
+        npm install -g newman-reporter-htmlextra
+        
+    - name: Create reports directory
+      run: mkdir -p postman/newman/reports
+      
+    - name: Run Postman Collection with multiple reporters
+      run: |
+        newman run ./postman/ABot_Test_Collection.json \
+          --reporters cli,json,htmlextra \
+          --reporter-json-export postman/newman/reports/results.json \
+          --reporter-htmlextra-export postman/newman/reports/results.html
+          
+    - name: Convert JSON to CSV (with explanation)
+      run: |
+        node -e "
+        const fs = require('fs');
+        const json = JSON.parse(fs.readFileSync('postman/newman/reports/results.json'));
+        
+        // More comprehensive status explanations
+        const statusExplain = {
+          200: 'OK - API executed successfully',
+          201: 'Created - Resource created successfully',
+          204: 'No Content - Request processed, no content returned',
+          400: 'Bad Request - Invalid parameters or request',
+          401: 'Unauthorized - Login failed or token missing',
+          403: 'Forbidden - Not authorized to access this resource',
+          404: 'Not Found - Resource not found',
+          409: 'Conflict - Resource conflict',
+          500: 'Server Error - Internal server error occurred'
+        };
+        
+        const csv = ['iteration,item_name,request_method,endpoint,response_code,status,time_ms,explanation'];
+        json.run.executions.forEach(exec => {
+          const code = exec.response?.code || '';
+          const status = exec.response?.status || '';
+          const time = exec.response?.responseTime || '';
+          const method = exec.request?.method || '';
+          const url = exec.request?.url?.path?.join('/') || '';
+          const explanation = statusExplain[code] || 'Unknown Status';
+          
+          // Clean item name for CSV (replace commas)
+          const itemName = (exec.item.name || '').replace(/,/g, ' ');
+          
+          csv.push([
+            exec.cursor?.iteration || 0,
+            itemName,
+            method,
+            url,
+            code,
+            status,
+            time,
+            explanation
+          ].join(','));
+        });
+        fs.writeFileSync('postman/newman/reports/results.csv', csv.join('\\n'));
+        "
+      
+    - name: Upload test results (JSON)
+      uses: actions/upload-artifact@v4
+      with:
+        name: postman-results-json
+        path: postman/newman/reports/results.json
+        
+    - name: Upload test results (CSV)
+      uses: actions/upload-artifact@v4
+      with:
+        name: postman-results-csv
+        path: postman/newman/reports/results.csv
+        
+    - name: Upload test results (HTML)
+      uses: actions/upload-artifact@v4
+      with:
+        name: postman-results-html
+        path: postman/newman/reports/results.html
+        
+    - name: Check for failed tests
+      run: |
+        node -e "
+        const fs = require('fs');
+        const json = JSON.parse(fs.readFileSync('postman/newman/reports/results.json'));
+        if (json.run.failures.length > 0) {
+          console.error('Tests failed: ' + json.run.failures.length + ' failures');
+          process.exit(1);
+        } else {
+          console.log('All tests passed successfully');
+        }
+        "
