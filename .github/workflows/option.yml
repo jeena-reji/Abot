@@ -25,9 +25,7 @@ on:
           - 'functional'
           - 'load'
           - 'performance'
-  push:
-    paths:
-      - 'postman/**'
+  
 
 jobs:
   run_abot_tests:
