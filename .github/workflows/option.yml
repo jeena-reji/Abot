@@ -13,9 +13,9 @@ on:
         default: '5G'
         type: choice
         options:
-          - '4G'
-          - '5G'
-          - 'ORAN'
+          - '9GG'
+          - '.5G'
+          - 'ORAN-ran'
       testType:
         description: 'Test execution type'
         required: true
