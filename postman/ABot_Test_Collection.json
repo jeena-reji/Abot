@@ -1,13 +1,12 @@
 {
   "info": {
-    "_postman_id": "abcd1234-demo",
-    "name": "Demo ABot API Collection",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "_exporter_id": "demo-exporter"
+    "_postman_id": "demo-full-abot-collection",
+    "name": "Full Demo ABot Flow",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
-      "name": "1. User Token (Demo)",
+      "name": "1. User Token API (Login)",
       "request": {
         "method": "POST",
         "header": [
@@ -18,12 +17,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n    \"username\": \"user123\",\n    \"password\": \"mypassword123\",\n    \"expires\": false\n}",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
+          "raw": "{\n    \"email\": \"admin\",\n    \"password\": \"admin1234\",\n    \"expires\": false\n}"
         },
         "url": {
           "raw": "https://reqres.in/api/login",
@@ -40,20 +34,9 @@
       }
     },
     {
-      "name": "2. Get Feature File List (Demo)",
+      "name": "2. Feature File Tags API (List Features)",
       "request": {
-        "auth": {
-          "type": "bearer",
-          "bearer": [
-            {
-              "key": "token",
-              "value": "{{token}}",
-              "type": "string"
-            }
-          ]
-        },
         "method": "GET",
-        "header": [],
         "url": {
           "raw": "https://jsonplaceholder.typicode.com/posts",
           "protocol": "https",
@@ -64,6 +47,230 @@
           ],
           "path": [
             "posts"
+          ]
+        }
+      }
+    },
+    {
+      "name": "3. Update Config API (Mock Config Save)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"network\": \"5G\",\n    \"type\": \"functional\"\n}"
+        },
+        "url": {
+          "raw": "https://jsonplaceholder.typicode.com/posts",
+          "protocol": "https",
+          "host": [
+            "jsonplaceholder",
+            "typicode",
+            "com"
+          ],
+          "path": [
+            "posts"
+          ]
+        }
+      }
+    },
+    {
+      "name": "4. Execute Feature File Tag API (Trigger Test)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"test_id\": \"12345\"\n}"
+        },
+        "url": {
+          "raw": "https://jsonplaceholder.typicode.com/posts",
+          "protocol": "https",
+          "host": [
+            "jsonplaceholder",
+            "typicode",
+            "com"
+          ],
+          "path": [
+            "posts"
+          ]
+        }
+      }
+    },
+    {
+      "name": "5. Execution Status API",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "https://jsonplaceholder.typicode.com/posts/1",
+          "protocol": "https",
+          "host": [
+            "jsonplaceholder",
+            "typicode",
+            "com"
+          ],
+          "path": [
+            "posts",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "6. Latest Artifact Name API",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "https://jsonplaceholder.typicode.com/comments",
+          "protocol": "https",
+          "host": [
+            "jsonplaceholder",
+            "typicode",
+            "com"
+          ],
+          "path": [
+            "comments"
+          ]
+        }
+      }
+    },
+    {
+      "name": "7. Execution Summary API",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "https://jsonplaceholder.typicode.com/comments/1",
+          "protocol": "https",
+          "host": [
+            "jsonplaceholder",
+            "typicode",
+            "com"
+          ],
+          "path": [
+            "comments",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "8. Vendor Key API",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "https://jsonplaceholder.typicode.com/users/1",
+          "protocol": "https",
+          "host": [
+            "jsonplaceholder",
+            "typicode",
+            "com"
+          ],
+          "path": [
+            "users",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "9. Execution Pass/Fail Result API",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "https://jsonplaceholder.typicode.com/users",
+          "protocol": "https",
+          "host": [
+            "jsonplaceholder",
+            "typicode",
+            "com"
+          ],
+          "path": [
+            "users"
+          ]
+        }
+      }
+    },
+    {
+      "name": "10. Failure Stats/Logs API",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "https://jsonplaceholder.typicode.com/posts/2",
+          "protocol": "https",
+          "host": [
+            "jsonplaceholder",
+            "typicode",
+            "com"
+          ],
+          "path": [
+            "posts",
+            "2"
+          ]
+        }
+      }
+    },
+    {
+      "name": "11. Latest Executed FF List API",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "https://jsonplaceholder.typicode.com/albums",
+          "protocol": "https",
+          "host": [
+            "jsonplaceholder",
+            "typicode",
+            "com"
+          ],
+          "path": [
+            "albums"
+          ]
+        }
+      }
+    },
+    {
+      "name": "12. Download TestAutomation Log API",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "https://jsonplaceholder.typicode.com/albums/1",
+          "protocol": "https",
+          "host": [
+            "jsonplaceholder",
+            "typicode",
+            "com"
+          ],
+          "path": [
+            "albums",
+            "1"
+          ]
+        }
+      }
+    },
+    {
+      "name": "13. Detail Execution Status API",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "https://jsonplaceholder.typicode.com/posts/3",
+          "protocol": "https",
+          "host": [
+            "jsonplaceholder",
+            "typicode",
+            "com"
+          ],
+          "path": [
+            "posts",
+            "3"
           ]
         }
       }
