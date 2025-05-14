@@ -4,7 +4,7 @@
   "values": [
     {
       "key": "ABOT_BASE_URL",
-      "value": "https://abot.example.com",
+      "value": "https://jsonplaceholder.typicode.com"
       "enabled": true
     },
     {
