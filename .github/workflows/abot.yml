@@ -30,22 +30,38 @@ jobs:
           --reporters cli,json \
           --reporter-json-export postman/newman/reports/results.json
 
-    - name: Convert JSON to CSV
+    - name: Convert JSON to CSV (with explanation)
       run: |
         node -e "
         const fs = require('fs');
         const json = JSON.parse(fs.readFileSync('postman/newman/reports/results.json'));
-        const csv = ['iteration,item.name,response.code,response.status'];
+        const statusExplain = {
+          200: 'OK - API executed successfully',
+          201: 'Created - Resource created successfully',
+          401: 'Unauthorized - Login failed or token missing'
+        };
+        const csv = ['iteration,item.name,response.code,response.status,explanation'];
         json.run.executions.forEach(exec => {
+          const code = exec.response.code;
+          const status = exec.response.status;
+          const explanation = statusExplain[code] || 'Unknown Status';
           csv.push([
             exec.cursor?.iteration || 0,
             exec.item.name,
-            exec.response.code,
-            exec.response.status
+            code,
+            status,
+            explanation
           ].join(','));
         });
         fs.writeFileSync('postman/newman/reports/results.csv', csv.join('\n'));
         "
+
+    - name: Debug:Check results.csv exists and content
+      run: |
+        echo "Listing directory:"
+        ls -l postman/newman/reports
+        echo "Showing CSV content:"
+        cat postman/newman/reports/results.csv
 
     - name: Upload test results (CSV)
       uses: actions/upload-artifact@v4
