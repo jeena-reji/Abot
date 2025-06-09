@@ -91,7 +91,7 @@ jobs:
         
     - name: Run Postman Collection with workflow inputs
       run: |
-        newman run ./postman/ABot_API.postman_collection.json \
+        newman run ./postman/ABot_Test_Collection.json \
           --environment ./postman/environment.json \
           --reporters cli,json,htmlextra \
           --reporter-json-export postman/newman/reports/results.json \
