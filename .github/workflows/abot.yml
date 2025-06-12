@@ -1,28 +1,39 @@
-name: ABot API Test Pipeline
+name: ABot API Secure Test Pipeline
 
 on:
-  workflow_dispatch:  # manual trigger, can also add cron
+  workflow_dispatch:
 
 jobs:
   run-abot-tests:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout Repo
         uses: actions/checkout@v3
 
       - name: Install Newman
         run: npm install -g newman
 
-      - name: Run ABot Postman Collection
+      - name: Create Postman Environment File with Secrets
+        run: |
+          jq --arg endpoint "${{ secrets.ABOT_ENDPOINT }}" \
+             --arg email "${{ secrets.ABOT_EMAIL }}" \
+             --arg password "${{ secrets.ABOT_PASSWORD }}" \
+             '
+             (.values[] | select(.key=="abot_endpoint").value) = $endpoint |
+             (.values[] | select(.key=="email").value) = $email |
+             (.values[] | select(.key=="password").value) = $password
+             ' postman/abot_env_template.json > postman/abot_env.json
+
+      - name: Run Postman Collection with Secrets
         run: |
           newman run postman/ABot_API.postman_collection.json \
-            --environment postman/abot_env.postman_environment.json \
+            --environment postman/abot_env.json \
             --reporters cli,html,json \
             --reporter-html-export abot_report.html \
             --reporter-json-export abot_report.json
 
-      - name: Upload HTML Report
+      - name: Upload Report
         uses: actions/upload-artifact@v3
         with:
           name: abot-html-report
