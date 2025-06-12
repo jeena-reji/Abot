@@ -1,0 +1,43 @@
+{
+  "id": "reqres-demo-env",
+  "name": "Demo ABot Environment",
+  "values": [
+    {
+      "key": "base_url",
+      "value": "https://reqres.in",
+      "enabled": true
+    },
+    {
+      "key": "email",
+      "value": "eve.holt@reqres.in",
+      "enabled": true
+    },
+    {
+      "key": "password",
+      "value": "cityslicka",
+      "enabled": true
+    },
+    {
+      "key": "token",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "featureTags",
+      "value": "@demo",
+      "enabled": true
+    },
+    {
+      "key": "executionId",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "foldername",
+      "value": "",
+      "enabled": true
+    }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_using": "Postman/10.0.0"
+}
