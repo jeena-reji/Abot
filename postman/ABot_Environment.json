@@ -1,0 +1,10 @@
+{
+  "id": "env-id",
+  "name": "ABot CI Env",
+  "values": [
+    { "key": "abot_endpoint", "value": "192.168.40.76", "enabled": true },
+    { "key": "token", "value": "", "enabled": true }
+  ],
+  "timestamp": 0,
+  "_postman_variable_scope": "environment"
+}
