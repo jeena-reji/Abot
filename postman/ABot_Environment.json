@@ -8,6 +8,14 @@
       "type": "default",
       "enabled": true
     },
+
+     {
+      "key": "token",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+
     {
       "key": "ABOT_USERNAME",
       "value": "user123",
