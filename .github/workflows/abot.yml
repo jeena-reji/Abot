@@ -1,0 +1,29 @@
+name: ABot API Test Pipeline
+
+on:
+  workflow_dispatch:  # manual trigger, can also add cron
+
+jobs:
+  run-abot-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Install Newman
+        run: npm install -g newman
+
+      - name: Run ABot Postman Collection
+        run: |
+          newman run postman/ABot_API.postman_collection.json \
+            --environment postman/abot_env.postman_environment.json \
+            --reporters cli,html,json \
+            --reporter-html-export abot_report.html \
+            --reporter-json-export abot_report.json
+
+      - name: Upload HTML Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: abot-html-report
+          path: abot_report.html
