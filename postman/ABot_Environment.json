@@ -1,10 +1,10 @@
 {
-  "id": "reqres-demo-env",
+  "id": "demo-env",
   "name": "Demo ABot Environment",
   "values": [
     {
-      "key": "base_url",
-      "value": "https://reqres.in",
+      "key": "userToken",
+      "value": "",
       "enabled": true
     },
     {
@@ -18,13 +18,18 @@
       "enabled": true
     },
     {
-      "key": "token",
-      "value": "",
+      "key": "featureTags",
+      "value": "@demo-test",
       "enabled": true
     },
     {
-      "key": "featureTags",
-      "value": "@demo",
+      "key": "networkType",
+      "value": "5G",
+      "enabled": true
+    },
+    {
+      "key": "testType",
+      "value": "functional",
       "enabled": true
     },
     {
@@ -33,11 +38,9 @@
       "enabled": true
     },
     {
-      "key": "foldername",
+      "key": "vendorKey",
       "value": "",
       "enabled": true
     }
-  ],
-  "_postman_variable_scope": "environment",
-  "_postman_exported_using": "Postman/10.0.0"
+  ]
 }
