@@ -23,7 +23,7 @@ jobs:
           TAG_NAME=${{ github.ref_name }}
           PACKAGE_NAME="ios-mcn-ran-dist-baremetal-${TAG_NAME}.tar.gz"
           tar -czvf "$PACKAGE_NAME" ios-mcn-ran
-          echo "✅ Created package: $PACKAGE_NAME"
+          echo " Created package: $PACKAGE_NAME"
 
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
