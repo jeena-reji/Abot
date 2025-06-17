@@ -1,10 +1,31 @@
 {
-  "id": "env-id",
-  "name": "ABot CI Env",
+  "id": "abot-env",
+  "name": "ABot Local VM",
   "values": [
-    { "key": "abot_endpoint", "value": "192.168.40.76", "enabled": true },
-    { "key": "token", "value": "", "enabled": true }
-  ],
-  "timestamp": 0,
-  "_postman_variable_scope": "environment"
+    {
+      "key": "abot_endpoint",
+      "value": "localhost:8000",
+      "enabled": true
+    },
+    {
+      "key": "token",
+      "value": "",
+      "enabled": true
+    },
+    {
+      "key": "user_id",
+      "value": "admin",
+      "enabled": true
+    },
+    {
+      "key": "featureTags",
+      "value": "@initial-attach-test",
+      "enabled": true
+    },
+    {
+      "key": "executionId",
+      "value": "",
+      "enabled": true
+    }
+  ]
 }
