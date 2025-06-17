@@ -4,7 +4,7 @@
   "values": [
     {
       "key": "abot_endpoint",
-      "value": "localhost:8000",
+      "value": "http://10.176.27.73:8000",
       "enabled": true
     },
     {
