@@ -1,32 +1,42 @@
-name: Test Baremetal Package Name
+name: ABot API Test Execution
 
 on:
-  push:
-    tags:
-      - 'v*'  # e.g. v0.1.3.rc6
+  workflow_dispatch:
 
 jobs:
-  test-package-name:
-    runs-on: ubuntu-latest
+  run-abot-tests:
+    runs-on: self-hosted
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
 
-      - name: Create dummy directory
-        run: |
-          mkdir ios-mcn-ran
-          echo "This is a test file" > ios-mcn-ran/README.txt
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
 
-      - name: Package with tag-based name
-        run: |
-          TAG_NAME=${{ github.ref_name }}
-          PACKAGE_NAME="ios-mcn-ran-dist-baremetal-${TAG_NAME}.tar.gz"
-          tar -czvf "$PACKAGE_NAME" ios-mcn-ran
-          echo " Created package: $PACKAGE_NAME"
+    - name: Install Newman
+      run: npm install -g newman newman-reporter-htmlextra
 
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-baremetal-package
-          path: ios-mcn-ran-dist-baremetal-${{ github.ref_name }}.tar.gz
+    - name: Run ABot Postman Collection
+      run: |
+        mkdir -p postman/newman/reports
+
+        newman run postman/ABot_API.postman_collection.json \
+          --environment postman/environment.json \
+          --reporters cli,json,htmlextra \
+          --reporter-json-export postman/newman/reports/results.json \
+          --reporter-htmlextra-export postman/newman/reports/results.html
+
+    - name: Upload test report (HTML)
+      uses: actions/upload-artifact@v4
+      with:
+        name: abot-api-results-html
+        path: postman/newman/reports/results.html
+
+    - name: Upload test report (JSON)
+      uses: actions/upload-artifact@v4
+      with:
+        name: abot-api-results-json
+        path: postman/newman/reports/results.json
