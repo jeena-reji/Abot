@@ -1,11 +1,38 @@
-name: Test Self-Hosted Runner
+name: Trigger ABot and Collect Result
 
 on:
   workflow_dispatch:
 
 jobs:
-  ping:
+  abot-trigger:
     runs-on: self-hosted
+
     steps:
-      - name: Say Hello
-        run: echo "Hello from CDAC server runner!"
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install Axios
+      run: npm install axios
+
+    - name: Create Reports Folder
+      run: mkdir -p abot/reports
+
+    - name: Trigger ABot and Fetch Results
+      run: node abot/scripts/trigger-abot.js
+
+    - name: Upload Result CSV
+      uses: actions/upload-artifact@v4
+      with:
+        name: abot-api-results-csv
+        path: abot/reports/results.csv
+
+    - name: Upload Summary JSON
+      uses: actions/upload-artifact@v4
+      with:
+        name: abot-api-summary
+        path: abot/reports/summary.json
