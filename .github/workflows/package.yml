@@ -24,7 +24,7 @@ jobs:
         mkdir -p postman/newman/reports
 
         newman run postman/ABot_API.postman_collection.json \
-          --environment postman/environment.json \
+          --environment postman/ABot_Environment.json \
           --reporters cli,json,htmlextra \
           --reporter-json-export postman/newman/reports/results.json \
           --reporter-htmlextra-export postman/newman/reports/results.html
