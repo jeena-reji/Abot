@@ -31,7 +31,7 @@ jobs:
           --reporter-htmlextra-export postman/newman/reports/results.html \
           --verbose
 
-    - name: Debug: Print token from login response
+    - name: Debug:Print token from login response
       run: |
         echo "Extracting token from Newman run result..."
         node -e "
