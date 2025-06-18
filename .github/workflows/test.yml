@@ -1,0 +1,119 @@
+name: ABot API Test Execution
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-abot-tests:
+    runs-on: self-hosted
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install Newman & Reporter
+      run: npm install -g newman newman-reporter-htmlextra
+
+    - name: Create Reports Folder
+      run: mkdir -p postman/newman/reports
+
+    - name: Run ABot Postman Collection
+      run: |
+        newman run postman/ABot_API.postman_collection.json \
+          --environment postman/ABot_Environment.json \
+          --reporters cli,json,htmlextra \
+          --reporter-json-export postman/newman/reports/results.json \
+          --reporter-htmlextra-export postman/newman/reports/results.html \
+          --verbose
+
+    - name: Debug: Print token from login response
+      run: |
+        echo "Extracting token from Newman run result..."
+        node -e "
+        const fs = require('fs');
+        const json = JSON.parse(fs.readFileSync('postman/newman/reports/results.json'));
+        const loginExec = json.run.executions.find(e => e.item.name.includes('User Token'));
+        if (loginExec && loginExec.response && loginExec.response.stream?.data) {
+          const responseBody = Buffer.from(loginExec.response.stream.data).toString();
+          console.log('Login Response Body:');
+          console.log(responseBody);
+        } else {
+          console.log('Could not find login response or token data.');
+        }
+        "
+
+    - name: Convert JSON to CSV
+      run: |
+        node -e "
+        const fs = require('fs');
+        const json = JSON.parse(fs.readFileSync('postman/newman/reports/results.json'));
+        const statusExplain = {
+          200: 'OK',
+          201: 'Created',
+          204: 'No Content',
+          400: 'Bad Request',
+          401: 'Unauthorized',
+          403: 'Forbidden',
+          404: 'Not Found',
+          409: 'Conflict',
+          500: 'Internal Server Error'
+        };
+        const csv = ['iteration,item_name,method,url,response_code,status,response_time_ms,explanation'];
+        json.run.executions.forEach(e => {
+          const row = [
+            e.cursor?.iteration || 0,
+            (e.item?.name || '').replace(/,/g, ' '),
+            e.request?.method || '',
+            e.request?.url?.raw || '',
+            e.response?.code || '',
+            e.response?.status || '',
+            e.response?.responseTime || '',
+            statusExplain[e.response?.code] || 'Unknown'
+          ];
+          csv.push(row.join(','));
+        });
+        fs.writeFileSync('postman/newman/reports/results.csv', csv.join('\\n'));
+        "
+
+    - name: Generate Summary Report
+      run: |
+        node -e "
+        const fs = require('fs');
+        const json = JSON.parse(fs.readFileSync('postman/newman/reports/results.json'));
+        const summary = {
+          totalRequests: json.run.stats.requests.total,
+          failedRequests: json.run.stats.requests.failed,
+          successRate: ((json.run.stats.requests.total - json.run.stats.requests.failed) / json.run.stats.requests.total * 100).toFixed(2) + '%',
+          totalTime: (json.run.timings.completed - json.run.timings.started) + 'ms'
+        };
+        fs.writeFileSync('postman/newman/reports/summary.json', JSON.stringify(summary, null, 2));
+        "
+
+    - name: Upload HTML Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: abot-api-results-html
+        path: postman/newman/reports/results.html
+
+    - name: Upload JSON Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: abot-api-results-json
+        path: postman/newman/reports/results.json
+
+    - name: Upload CSV Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: abot-api-results-csv
+        path: postman/newman/reports/results.csv
+
+    - name: Upload Summary Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: abot-api-summary
+        path: postman/newman/reports/summary.json
