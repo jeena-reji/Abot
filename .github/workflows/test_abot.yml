@@ -112,3 +112,28 @@ jobs:
       with:
         name: abot-api-summary
         path: postman/newman/reports/summary.json
+
+    - name: Fail if Feature Test Failed in ABot
+      run: |
+        node -e "
+        const fs = require('fs');
+        const data = JSON.parse(fs.readFileSync('postman/newman/reports/results.json'));
+
+        const summaryExec = data.run.executions.find(e => e.item.name.includes('Execution summary'));
+        if (summaryExec && summaryExec.response && summaryExec.response.stream?.data) {
+          const body = Buffer.from(summaryExec.response.stream.data).toString();
+          const parsed = JSON.parse(body);
+
+          const failed = parsed.feature_summary?.result?.totalScenarios?.totalScenariosFailed?.totalScenariosFailedNumber || 0;
+
+          if (failed > 0) {
+            console.error(` ABot reported ${failed} failed scenario(s). Failing the pipeline.`);
+            process.exit(1);
+          } else {
+            console.log('All ABot feature scenarios passed.');
+          }
+        } else {
+          console.error(' Execution summary not found or failed to parse.');
+          process.exit(1);
+        }
+        "
