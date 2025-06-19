@@ -22,14 +22,9 @@ jobs:
     - name: Create Reports Folder
       run: mkdir -p postman/newman/reports
 
-    - name: Run ABot Postman Collection
-      run: |
-        newman run postman/ABot_API_postman_collection.json \
-          --environment postman/ABot_Environment.json \
-          --reporters cli,json,htmlextra \
-          --reporter-json-export postman/newman/reports/results.json \
-          --reporter-htmlextra-export postman/newman/reports/results.html \
-          --verbose
+    - name: Run Real ABot Test via Script
+      run: node abot_runner.js
+
 
     - name: Debug:Print token from login response
       run: |
