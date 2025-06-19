@@ -25,7 +25,6 @@ jobs:
     - name: Run Real ABot Test via Script
       run: node abot_runner.js
 
-
     - name: Debug:Print token from login response
       run: |
         echo "Extracting token from Newman run result..."
@@ -89,6 +88,32 @@ jobs:
         fs.writeFileSync('postman/newman/reports/summary.json', JSON.stringify(summary, null, 2));
         "
 
+    #  This is the new step that checks for actual test failures
+    - name: Fail if ABot Feature Test Failed
+      run: |
+        node -e "
+        const fs = require('fs');
+        const json = JSON.parse(fs.readFileSync('postman/newman/reports/results.json'));
+
+        const exec = json.run.executions.find(e => e.item.name.includes('Execution summary'));
+        if (!exec || !exec.response || !exec.response.stream?.data) {
+          console.error('Cannot find Execution Summary in response.');
+          process.exit(1);
+        }
+
+        const body = Buffer.from(exec.response.stream.data).toString();
+        const parsed = JSON.parse(body);
+
+        const failedScenarios = parsed.feature_summary?.result?.totalScenarios?.totalScenariosFailed?.totalScenariosFailedNumber || 0;
+
+        if (failedScenarios > 0) {
+          console.error(` ${failedScenarios} test scenario(s) failed. Failing pipeline.`);
+          process.exit(1);
+        } else {
+          console.log(' All ABot feature tests passed.');
+        }
+        "
+
     - name: Upload HTML Report
       uses: actions/upload-artifact@v4
       with:
@@ -112,28 +137,3 @@ jobs:
       with:
         name: abot-api-summary
         path: postman/newman/reports/summary.json
-
-    - name: Fail if Feature Test Failed in ABot
-      run: |
-        node -e "
-        const fs = require('fs');
-        const data = JSON.parse(fs.readFileSync('postman/newman/reports/results.json'));
-
-        const summaryExec = data.run.executions.find(e => e.item.name.includes('Execution summary'));
-        if (summaryExec && summaryExec.response && summaryExec.response.stream?.data) {
-          const body = Buffer.from(summaryExec.response.stream.data).toString();
-          const parsed = JSON.parse(body);
-
-          const failed = parsed.feature_summary?.result?.totalScenarios?.totalScenariosFailed?.totalScenariosFailedNumber || 0;
-
-          if (failed > 0) {
-            console.error(` ABot reported ${failed} failed scenario(s). Failing the pipeline.`);
-            process.exit(1);
-          } else {
-            console.log('All ABot feature scenarios passed.');
-          }
-        } else {
-          console.error(' Execution summary not found or failed to parse.');
-          process.exit(1);
-        }
-        "
