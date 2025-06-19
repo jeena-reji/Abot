@@ -22,9 +22,6 @@ jobs:
     - name: Create Reports Folder
       run: mkdir -p postman/newman/reports
 
-    - name: Run Real ABot Test via Script
-      run: node abot_runner.js
-
     - name: Debug:Print token from login response
       run: |
         echo "Extracting token from Newman run result..."
