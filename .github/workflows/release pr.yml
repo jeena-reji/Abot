@@ -18,3 +18,4 @@ jobs:
           gh release create "$GITHUB_REF_NAME" --generate-notes
         env:
           GITHUB_TOKEN: ${{ secrets.GHCRUSER }}
+
