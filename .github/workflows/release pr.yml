@@ -17,5 +17,5 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" --generate-notes
         env:
-          GITHUB_TOKEN: ${{ secrets.GHCRUSER }}
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
 
