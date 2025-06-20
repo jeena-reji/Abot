@@ -5,7 +5,7 @@ import os
 ABOT_BASE_URL = "https://abot.example.com" 
 
 def get_auth_token():
-url = f"{ABOT_BASE_URL}/api/auth/token"
+
 data = {
 "username": os.environ.get("ABOT_USERNAME"),
 "password": os.environ.get("ABOT_PASSWORD")
