@@ -2,7 +2,7 @@ import requests
 import time
 import os
 
-ABOT_BASE_URL = "https://abot.example.com" # Replace with your ABot host
+ABOT_BASE_URL = "https://abot.example.com" 
 
 def get_auth_token():
 url = f"{ABOT_BASE_URL}/api/auth/token"
