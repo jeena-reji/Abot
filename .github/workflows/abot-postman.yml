@@ -23,8 +23,8 @@ jobs:
       - name: Run ABot Postman Collection
         run: |
           mkdir -p results
-          newman run abot_collection.json \
-            --environment abot_environment.json \
+          newman run postman/abot_collection.json \
+            --environment /postman/abot_environment.json \
             --reporters cli,html,json,csv \
             --reporter-html-export results/abot-report.html \
             --reporter-json-export results/abot-report.json \
