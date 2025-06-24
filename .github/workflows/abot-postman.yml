@@ -1,0 +1,36 @@
+name: ABot API Postman Tests
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-abot-postman:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Newman and Reporters
+        run: |
+          npm install -g newman
+          npm install -g newman-reporter-html newman-reporter-htmlextra newman-reporter-json newman-reporter-csv
+
+      - name: Run ABot Postman Collection
+        run: |
+          newman run abot_collection.json \
+            --environment abot_environment.json \
+            --reporters cli,html,json,csv \
+            --reporter-html-export results/abot-report.html \
+            --reporter-json-export results/abot-report.json \
+            --reporter-csv-export results/abot-report.csv
+
+      - name: Upload Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: abot-test-results
+          path: results/
