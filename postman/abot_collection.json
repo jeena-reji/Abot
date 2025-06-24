@@ -1,0 +1,225 @@
+{
+  "info": {
+    "_postman_id": "abot-collection-001",
+    "name": "ABot Flow Automation",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Login to ABot",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"{{email}}\",\n    \"password\": \"{{password}}\",\n    \"expires\": false\n}"
+        },
+        "url": {
+          "raw": "http://{{abot_endpoint}}/abotrest/abot/api/v5/login",
+          "host": [
+            "{{abot_endpoint}}"
+          ],
+          "path": [
+            "abotrest",
+            "abot",
+            "api",
+            "v5",
+            "login"
+          ],
+          "protocol": "http"
+        }
+      }
+    },
+    {
+      "name": "2. Fetch Feature File Tags",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://{{abot_endpoint}}/abotrest/abot/api/v5/feature_files_tags",
+          "host": [
+            "{{abot_endpoint}}"
+          ],
+          "path": [
+            "abotrest",
+            "abot",
+            "api",
+            "v5",
+            "feature_files_tags"
+          ],
+          "protocol": "http"
+        }
+      }
+    },
+    {
+      "name": "3. Update Config",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"uncomment\": [\n        \"ABOT.SUTVARS=file:abot-emulated/sut-vars/default.properties\"\n    ],\n    \"comment\": [\n        \"ABOT.SUTVARS=file:abot-emulated/sut-vars/default5g.properties\",\n        \"ABOT.SUTVARS=file:abot-emulated/sut-vars/default4g5g.properties\",\n        \"ABOT.SUTVARS.ORAN=file:abot-emulated/sut-vars/default5g-oran.properties\"\n    ],\n    \"update\": {}\n}"
+        },
+        "url": {
+          "raw": "http://{{abot_endpoint}}/abotrest/abot/api/v5/update_config_properties?filename=\"/etc/rebaca-test-suite/config/admin/ABotConfig.properties\"",
+          "host": [
+            "{{abot_endpoint}}"
+          ],
+          "path": [
+            "abotrest",
+            "abot",
+            "api",
+            "v5",
+            "update_config_properties"
+          ],
+          "query": [
+            {
+              "key": "filename",
+              "value": "\"/etc/rebaca-test-suite/config/admin/ABotConfig.properties\""
+            }
+          ],
+          "protocol": "http"
+        }
+      }
+    },
+    {
+      "name": "4. Execute Featurefile",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"params\": \"initial-attach-test\"\n}"
+        },
+        "url": {
+          "raw": "http://{{abot_endpoint}}/abotrest/abot/api/v5/feature_files/execute",
+          "host": [
+            "{{abot_endpoint}}"
+          ],
+          "path": [
+            "abotrest",
+            "abot",
+            "api",
+            "v5",
+            "feature_files",
+            "execute"
+          ],
+          "protocol": "http"
+        }
+      }
+    },
+    {
+      "name": "5. Check Execution Status",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://{{abot_endpoint}}/abotrest/abot/api/v5/execution_status",
+          "host": [
+            "{{abot_endpoint}}"
+          ],
+          "path": [
+            "abotrest",
+            "abot",
+            "api",
+            "v5",
+            "execution_status"
+          ],
+          "protocol": "http"
+        }
+      }
+    },
+    {
+      "name": "6. Get Latest Artifact Name",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://{{abot_endpoint}}/abotrest/abot/api/v5/latest_artifact_name",
+          "host": [
+            "{{abot_endpoint}}"
+          ],
+          "path": [
+            "abotrest",
+            "abot",
+            "api",
+            "v5",
+            "latest_artifact_name"
+          ],
+          "protocol": "http"
+        }
+      }
+    },
+    {
+      "name": "7. Execution Summary",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://{{abot_endpoint}}/abotrest/abot/api/v5/artifacts/execFeatureSummary?foldername={{artifact_name}}&page=1&limit=9998",
+          "host": [
+            "{{abot_endpoint}}"
+          ],
+          "path": [
+            "abotrest",
+            "abot",
+            "api",
+            "v5",
+            "artifacts",
+            "execFeatureSummary"
+          ],
+          "query": [
+            {
+              "key": "foldername",
+              "value": "{{artifact_name}}"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "9998"
+            }
+          ],
+          "protocol": "http"
+        }
+      }
+    }
+  ]
+}
