@@ -5,7 +5,7 @@ const BASE_URL = 'http://10.176.27.73/abotrest/abot/api/v5';
 const USERNAME = 'admin';
 const PASSWORD = 'admin1234';
 const FEATURE_TAG = '@initial-attach-test';
-const EXECUTION_NAME = new Date().toISOString().replace(/[:.]/g, '-') + `@${FEATURE_TAG}`;
+const EXECUTION_NAME = new Date().toISOString().replace(/[:.]/g, '-'
 
 (async () => {
   try {
